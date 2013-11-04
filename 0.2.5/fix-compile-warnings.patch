@@ -1,0 +1,115 @@
+diff --git a/LibOVR/Src/Kernel/OVR_ThreadsPthread.cpp b/LibOVR/Src/Kernel/OVR_ThreadsPthread.cpp
+index e8d6753..d8551f6 100644
+--- a/LibOVR/Src/Kernel/OVR_ThreadsPthread.cpp
++++ b/LibOVR/Src/Kernel/OVR_ThreadsPthread.cpp
+@@ -636,7 +636,7 @@ static const char* mapsched_policy(int policy)
+ void* Thread_PthreadStartFn(void* phandle)
+ {
+     Thread* pthread = (Thread*)phandle;
+-    int     result = pthread->PRun();
++    long     result = pthread->PRun();
+     // Signal the thread as done and release it atomically.
+     pthread->FinishAndRelease();
+     // At this point Thread object might be dead; however we can still pass
+@@ -754,7 +754,7 @@ void    Thread::Exit(int exitCode)
+     FinishAndRelease();
+     ThreadList::RemoveRunningThread(this);
+ 
+-    pthread_exit((void *) exitCode);
++    pthread_exit((void *) (long) exitCode);
+ }
+ 
+ ThreadId GetCurrentThreadId()
+diff --git a/LibOVR/Src/OVR_Profile.cpp b/LibOVR/Src/OVR_Profile.cpp
+index 3be43db..c01f92f 100644
+--- a/LibOVR/Src/OVR_Profile.cpp
++++ b/LibOVR/Src/OVR_Profile.cpp
+@@ -340,7 +340,7 @@ void ProfileManager::SaveCache()
+         json_profile->AddNumberItem("PlayerHeight", profile->PlayerHeight);
+         json_profile->AddNumberItem("IPD", profile->IPD);
+ 
+-        char* device_name = NULL;
++        const char* device_name = NULL;
+         // Create a device-specific subtree for the cached device
+         if (profile->Type == Profile_RiftDK1)
+         {
+diff --git a/Samples/CommonSrc/Render/Render_GL_Device.h b/Samples/CommonSrc/Render/Render_GL_Device.h
+index 88eaff4..23ba6b2 100644
+--- a/Samples/CommonSrc/Render/Render_GL_Device.h
++++ b/Samples/CommonSrc/Render/Render_GL_Device.h
+@@ -34,7 +34,9 @@ limitations under the License.
+ #include <OpenGL/gl.h>
+ #include <OpenGL/glext.h>
+ #else
+-#define GL_GLEXT_PROTOTYPES
++#ifndef GL_GLEXT_PROTOTYPES
++# define GL_GLEXT_PROTOTYPES
++#endif
+ #include <GL/gl.h>
+ #include <GL/glext.h>
+ #endif
+diff --git a/Samples/CommonSrc/Render/Render_D3D1X_Device.cpp b/Samples/CommonSrc/Render/Render_D3D1X_Device.cpp
+index 6408e08..47f3d78 100644
+--- a/Samples/CommonSrc/Render/Render_D3D1X_Device.cpp
++++ b/Samples/CommonSrc/Render/Render_D3D1X_Device.cpp
+@@ -1695,7 +1695,7 @@ void RenderDevice::Render(const Matrix4f& matrix, Model* model)
+ }
+ 
+ void RenderDevice::RenderWithAlpha(	const Fill* fill, Render::Buffer* vertices, Render::Buffer* indices,
+-									const Matrix4f& matrix, int offset, int count, PrimitiveType rprim)
++									const Matrix4f& matrix, size_t offset, int count, PrimitiveType rprim)
+ {
+ 	Context->OMSetBlendState(BlendState, NULL, 0xffffffff);
+     Render(fill, vertices, indices, matrix, offset, count, rprim);
+diff --git a/Samples/CommonSrc/Render/Render_D3D1X_Device.h b/Samples/CommonSrc/Render/Render_D3D1X_Device.h
+index b615e2b..952c454 100644
+--- a/Samples/CommonSrc/Render/Render_D3D1X_Device.h
++++ b/Samples/CommonSrc/Render/Render_D3D1X_Device.h
+@@ -340,7 +340,7 @@ public:
+ 
+     virtual void Render(const Matrix4f& matrix, Model* model);
+     virtual void Render(const Fill* fill, Render::Buffer* vertices, Render::Buffer* indices,
+-                        const Matrix4f& matrix, int offset, int count, PrimitiveType prim = Prim_Triangles);
++                        const Matrix4f& matrix, size_t offset, int count, PrimitiveType prim = Prim_Triangles);
+     virtual void RenderWithAlpha(   const Fill* fill, Render::Buffer* vertices, Render::Buffer* indices,
+                                     const Matrix4f& matrix, int offset, int count, PrimitiveType prim = Prim_Triangles);
+ 
+diff --git a/Samples/CommonSrc/Render/Render_Device.h b/Samples/CommonSrc/Render/Render_Device.h
+index 028f282..fcff75f 100644
+--- a/Samples/CommonSrc/Render/Render_Device.h
++++ b/Samples/CommonSrc/Render/Render_Device.h
+@@ -818,7 +818,7 @@ public:
+     virtual void Render(const Matrix4f& matrix, Model* model) = 0;
+     // offset is in bytes; indices can be null.
+     virtual void Render(const Fill* fill, Buffer* vertices, Buffer* indices,
+-                        const Matrix4f& matrix, int offset, int count, PrimitiveType prim = Prim_Triangles) = 0;
++                        const Matrix4f& matrix, size_t offset, int count, PrimitiveType prim = Prim_Triangles) = 0;
+     virtual void RenderWithAlpha(const Fill* fill, Render::Buffer* vertices, Render::Buffer* indices,
+                         const Matrix4f& matrix, int offset, int count, PrimitiveType prim = Prim_Triangles) = 0;
+ 
+diff --git a/Samples/CommonSrc/Render/Render_GL_Device.cpp b/Samples/CommonSrc/Render/Render_GL_Device.cpp
+index aaf1f0e..731641e 100644
+--- a/Samples/CommonSrc/Render/Render_GL_Device.cpp
++++ b/Samples/CommonSrc/Render/Render_GL_Device.cpp
+@@ -428,7 +428,7 @@ void RenderDevice::Render(const Matrix4f& matrix, Model* model)
+ }
+ 
+ void RenderDevice::Render(const Fill* fill, Render::Buffer* vertices, Render::Buffer* indices,
+-                      const Matrix4f& matrix, int offset, int count, PrimitiveType rprim)
++                      const Matrix4f& matrix, size_t offset, int count, PrimitiveType rprim)
+ {
+     ShaderSet* shaders = (ShaderSet*) ((ShaderFill*)fill)->GetShaders();
+ 
+diff --git a/Samples/CommonSrc/Render/Render_GL_Device.h b/Samples/CommonSrc/Render/Render_GL_Device.h
+index 23ba6b2..8377ac8 100644
+--- a/Samples/CommonSrc/Render/Render_GL_Device.h
++++ b/Samples/CommonSrc/Render/Render_GL_Device.h
+@@ -211,7 +211,7 @@ public:
+ 
+     virtual void Render(const Matrix4f& matrix, Model* model);
+     virtual void Render(const Fill* fill, Render::Buffer* vertices, Render::Buffer* indices,
+-                        const Matrix4f& matrix, int offset, int count, PrimitiveType prim = Prim_Triangles);
++                        const Matrix4f& matrix, size_t offset, int count, PrimitiveType prim = Prim_Triangles);
+     virtual void RenderWithAlpha(const Fill* fill, Render::Buffer* vertices, Render::Buffer* indices,
+                                  const Matrix4f& matrix, int offset, int count, PrimitiveType prim = Prim_Triangles);
+ 

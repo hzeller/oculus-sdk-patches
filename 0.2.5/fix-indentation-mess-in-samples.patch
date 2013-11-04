@@ -1,0 +1,794 @@
+diff --git a/Samples/OculusWorldDemo/OculusWorldDemo.cpp b/Samples/OculusWorldDemo/OculusWorldDemo.cpp
+index 1a81c8d..49d49bc 100644
+--- a/Samples/OculusWorldDemo/OculusWorldDemo.cpp
++++ b/Samples/OculusWorldDemo/OculusWorldDemo.cpp
+@@ -4,7 +4,7 @@ Filename    :   OculusWorldDemo.cpp
+ Content     :   First-person view test application for Oculus Rift
+ Created     :   October 4, 2012
+ Authors     :   Michael Antonov, Andrew Reisse, Steve LaValle
+-				Peter Hoff, Dan Goodman, Bryan Croteau
++                Peter Hoff, Dan Goodman, Bryan Croteau
+ 
+ Copyright   :   Copyright 2012 Oculus VR, Inc. All Rights reserved.
+ 
+@@ -64,13 +64,13 @@ using namespace OVR::Render;
+ // Important Oculus-specific logic can be found at following locations:
+ //
+ //  OculusWorldDemoApp::OnStartup - This function will initialize OVR::DeviceManager and HMD,
+-//									creating SensorDevice and attaching it to SensorFusion.
+-//									This needs to be done before obtaining sensor data.
++//                                    creating SensorDevice and attaching it to SensorFusion.
++//                                    This needs to be done before obtaining sensor data.
+ //
+ //  OculusWorldDemoApp::OnIdle    - Here we poll SensorFusion for orientation, apply it
+-//									to the scene and handle movement.
+-//									Stereo rendering is also done here, by delegating to
+-//									to Render function for each eye.
++//                                    to the scene and handle movement.
++//                                    Stereo rendering is also done here, by delegating to
++//                                    to Render function for each eye.
+ //
+ 
+ //-------------------------------------------------------------------------------------
+@@ -122,13 +122,13 @@ public:
+     void         AdjustDistortionK2(float dt)  { AdjustDistortion(dt, 2, "K2"); }
+     void         AdjustDistortionK3(float dt)  { AdjustDistortion(dt, 3, "K3"); }
+ 
+-	void		 AdjustDistortion(float val, int kIndex);
+-	void		 AdjustEsd(float val);
++    void         AdjustDistortion(float val, int kIndex);
++    void         AdjustEsd(float val);
+ 
+     // Adds room model to scene.
+     void         PopulateScene(const char* fileName);
+     void         PopulatePreloadScene();
+-    void		 ClearScene();
++    void         ClearScene();
+ 
+     // Magnetometer calibration procedure
+     void         UpdateManualMagCalibration();
+@@ -168,8 +168,8 @@ protected:
+         LoadingState_Finished
+     };
+ 
+-	// Player
+-    Player				ThePlayer;
++    // Player
++    Player                ThePlayer;
+     Matrix4f            View;
+     Scene               MainScene;
+     Scene               LoadingScene;
+@@ -187,10 +187,10 @@ protected:
+     PostProcessType     PostProcess;
+ 
+     // LOD
+-    String	            MainFilePath;
++    String                MainFilePath;
+     Array<String>       LODFilePaths;
+-    int					ConsecutiveLowFPSFrames;
+-    int					CurrentLODFileIndex;
++    int                    ConsecutiveLowFPSFrames;
++    int                    CurrentLODFileIndex;
+ 
+     float               DistortionK0;
+     float               DistortionK1;
+@@ -239,10 +239,10 @@ protected:
+         MessageType     Action;
+ 
+         DeviceStatusNotificationDesc():Action(Message_None) {}
+-        DeviceStatusNotificationDesc(MessageType mt, const DeviceHandle& dev) 
++        DeviceStatusNotificationDesc(MessageType mt, const DeviceHandle& dev)
+             : Handle(dev), Action(mt) {}
+     };
+-    Array<DeviceStatusNotificationDesc> DeviceStatusNotificationsQueue; 
++    Array<DeviceStatusNotificationDesc> DeviceStatusNotificationsQueue;
+ 
+ 
+     Model* CreateModel(Vector3f pos, struct SlabModel* sm);
+@@ -297,9 +297,9 @@ OculusWorldDemoApp::~OculusWorldDemoApp()
+     pLatencyTester.Clear();
+     pSensor.Clear();
+     pHMD.Clear();
+-    
+-	CollisionModels.ClearAndRelease();
+-	GroundCollisionModels.ClearAndRelease();
++
++    CollisionModels.ClearAndRelease();
++    GroundCollisionModels.ClearAndRelease();
+ }
+ 
+ int OculusWorldDemoApp::OnStartup(int argc, const char** argv)
+@@ -315,7 +315,7 @@ int OculusWorldDemoApp::OnStartup(int argc, const char** argv)
+ 
+     // We'll handle it's messages in this case.
+     pManager->SetMessageHandler(this);
+-    
++
+ 
+     pHMD = *pManager->EnumerateDevices<HMDDevice>().CreateDevice();
+     if (pHMD)
+@@ -332,7 +332,7 @@ int OculusWorldDemoApp::OnStartup(int argc, const char** argv)
+             SConfig.SetHMDInfo(TheHMDInfo);
+         }
+ 
+-        // Retrieve relevant profile settings. 
++        // Retrieve relevant profile settings.
+         pUserProfile = pHMD->GetProfile();
+         if (pUserProfile)
+         {
+@@ -347,7 +347,7 @@ int OculusWorldDemoApp::OnStartup(int argc, const char** argv)
+         // a shipping app.
+         pSensor = *pManager->EnumerateDevices<SensorDevice>().CreateDevice();
+     }
+-        
++
+     // Create the Latency Tester device and assign it to the LatencyTesterUtil object.
+     pLatencyTester = *pManager->EnumerateDevices<LatencyTestDevice>().CreateDevice();
+     if (pLatencyTester)
+@@ -399,7 +399,7 @@ int OculusWorldDemoApp::OnStartup(int argc, const char** argv)
+ 
+     // Report relative mouse motion in OnMouseMove
+     pPlatform->SetMouseMode(Mouse_Relative);
+-    
++
+     if(pSensor)
+     {
+         // We need to attach sensor to SensorFusion object for it to receive
+@@ -449,9 +449,9 @@ int OculusWorldDemoApp::OnStartup(int argc, const char** argv)
+     if (TheHMDInfo.HScreenSize > 0.0f)
+     {
+         if (TheHMDInfo.HScreenSize > 0.140f)  // 7"
+-            SConfig.SetDistortionFitPointVP(-1.0f, 0.0f);        
+-        else        
+-            SConfig.SetDistortionFitPointVP(0.0f, 1.0f);        
++            SConfig.SetDistortionFitPointVP(-1.0f, 0.0f);
++        else
++            SConfig.SetDistortionFitPointVP(0.0f, 1.0f);
+     }
+ 
+     pRender->SetSceneRenderScale(SConfig.GetDistortionScale());
+@@ -461,17 +461,17 @@ int OculusWorldDemoApp::OnStartup(int argc, const char** argv)
+ 
+ 
+     // *** Identify Scene File & Prepare for Loading
+-   
++
+     // This creates lights and models.
+     if (argc == 2)
+-    {        
++    {
+         MainFilePath = argv[1];
+         PopulateLODFileNames();
+     }
+     else
+     {
+         fprintf(stderr, "Usage: OculusWorldDemo [input XML]\n");
+-        MainFilePath = WORLDDEMO_ASSET_FILE;	
++        MainFilePath = WORLDDEMO_ASSET_FILE;
+     }
+ 
+     // Try to modify path for correctness in case specified file is not found.
+@@ -491,8 +491,8 @@ int OculusWorldDemoApp::OnStartup(int argc, const char** argv)
+     PopulatePreloadScene();
+ 
+     LastUpdate = pPlatform->GetAppTime();
+-	//pPlatform->PlayMusicFile(L"Loop.wav");
+-    
++    //pPlatform->PlayMusicFile(L"Loop.wav");
++
+     return 0;
+ }
+ 
+@@ -516,11 +516,11 @@ void OculusWorldDemoApp::OnMessage(const Message& msg)
+                 case OVR::Message_DeviceAdded:
+                     LogText("DeviceManager reported device added.\n");
+                     break;
+-                
++
+                 case OVR::Message_DeviceRemoved:
+                     LogText("DeviceManager reported device removed.\n");
+                     break;
+-                
++
+                 default: OVR_ASSERT(0); // unexpected type
+             }
+         }
+@@ -686,7 +686,7 @@ void OculusWorldDemoApp::OnKey(OVR::KeyCode key, int chr, bool down, int modifie
+     case Key_F4:
+         if (!down)
+         {
+-			RenderParams = pRender->GetParams();
++            RenderParams = pRender->GetParams();
+             RenderParams.Multisample = RenderParams.Multisample > 1 ? 1 : 4;
+             pRender->SetParams(RenderParams);
+             if(RenderParams.Multisample > 1)
+@@ -718,7 +718,7 @@ void OculusWorldDemoApp::OnKey(OVR::KeyCode key, int chr, bool down, int modifie
+             RenderParams.Display = DisplayId(SConfig.GetHMDInfo().DisplayDeviceName,SConfig.GetHMDInfo().DisplayId);
+             pRender->SetParams(RenderParams);
+ 
+-            pPlatform->SetMouseMode(Mouse_Normal);            
++            pPlatform->SetMouseMode(Mouse_Normal);
+             pPlatform->SetFullscreen(RenderParams, pRender->IsFullscreen() ? Display_Window : Display_FakeFullscreen);
+             pPlatform->SetMouseMode(Mouse_Relative); // Avoid mode world rotation jump.
+             // If using an HMD, enable post-process (for distortion) and stereo.
+@@ -818,58 +818,58 @@ void OculusWorldDemoApp::OnKey(OVR::KeyCode key, int chr, bool down, int modifie
+ 
+             if(SavedK0 > 0.0f)
+             {
+-				SConfig.SetDistortionK(0, SavedK0);
+-				SConfig.SetDistortionK(1, SavedK1);
+-				SConfig.SetDistortionK(2, SavedK2);
+-				SConfig.SetDistortionK(3, SavedK3);
+-				SConfig.SetEyeToScreenDistance(SavedESD);
+-				SConfig.SetAspectMultiplier(SavedAspect);
+-				SConfig.SetIPD(SavedEyeDistance);
+-
+-				if ( ShiftDown )
+-				{
+-					// Swap saved and current values. Good for doing direct comparisons.
+-					SetAdjustMessage("Swapped current and saved. New settings:\n"
+-									 "ESD:\t120 %.3f\t350 Eye:\t490 %.3f\n"
+-									 "K0: \t120 %.4f\t350 K2: \t490 %.4f\n"
+-									 "K1: \t120 %.4f\t350 K3: \t490 %.4f\n",
+-									 SavedESD, SavedEyeDistance,
+-									 SavedK0, SavedK2,
+-									 SavedK1, SavedK3);
+-					SavedK0 = t0;
+-					SavedK1 = t1;
+-					SavedK2 = t2;
+-					SavedK3 = t3;
+-					SavedESD = tESD;
+-					SavedAspect = taspect;
+-					SavedEyeDistance = tipd;
+-				}
+-				else
+-				{
+-					SetAdjustMessage("Restored:\n"
+-									 "ESD:\t120 %.3f\t350 Eye:\t490 %.3f\n"
+-									 "K0: \t120 %.4f\t350 K2: \t490 %.4f\n"
+-									 "K1: \t120 %.4f\t350 K3: \t490 %.4f\n",
+-									 SavedESD, SavedEyeDistance,
+-									 SavedK0, SavedK2,
+-									 SavedK1, SavedK3);
+-				}
++                SConfig.SetDistortionK(0, SavedK0);
++                SConfig.SetDistortionK(1, SavedK1);
++                SConfig.SetDistortionK(2, SavedK2);
++                SConfig.SetDistortionK(3, SavedK3);
++                SConfig.SetEyeToScreenDistance(SavedESD);
++                SConfig.SetAspectMultiplier(SavedAspect);
++                SConfig.SetIPD(SavedEyeDistance);
++
++                if ( ShiftDown )
++                {
++                    // Swap saved and current values. Good for doing direct comparisons.
++                    SetAdjustMessage("Swapped current and saved. New settings:\n"
++                                     "ESD:\t120 %.3f\t350 Eye:\t490 %.3f\n"
++                                     "K0: \t120 %.4f\t350 K2: \t490 %.4f\n"
++                                     "K1: \t120 %.4f\t350 K3: \t490 %.4f\n",
++                                     SavedESD, SavedEyeDistance,
++                                     SavedK0, SavedK2,
++                                     SavedK1, SavedK3);
++                    SavedK0 = t0;
++                    SavedK1 = t1;
++                    SavedK2 = t2;
++                    SavedK3 = t3;
++                    SavedESD = tESD;
++                    SavedAspect = taspect;
++                    SavedEyeDistance = tipd;
++                }
++                else
++                {
++                    SetAdjustMessage("Restored:\n"
++                                     "ESD:\t120 %.3f\t350 Eye:\t490 %.3f\n"
++                                     "K0: \t120 %.4f\t350 K2: \t490 %.4f\n"
++                                     "K1: \t120 %.4f\t350 K3: \t490 %.4f\n",
++                                     SavedESD, SavedEyeDistance,
++                                     SavedK0, SavedK2,
++                                     SavedK1, SavedK3);
++                }
+             }
+             else
+             {
+                 SetAdjustMessage("Setting Saved");
+-				SavedK0 = t0;
+-				SavedK1 = t1;
+-				SavedK2 = t2;
+-				SavedK3 = t3;
+-				SavedESD = tESD;
+-				SavedAspect = taspect;
+-				SavedEyeDistance = tipd;
++                SavedK0 = t0;
++                SavedK1 = t1;
++                SavedK2 = t2;
++                SavedK3 = t3;
++                SavedESD = tESD;
++                SavedAspect = taspect;
++                SavedEyeDistance = tipd;
+             }
+ 
+         }
+-        break; 
+- 
++        break;
++
+     case Key_G:
+         if (down)
+         {
+@@ -953,7 +953,7 @@ void OculusWorldDemoApp::OnKey(OVR::KeyCode key, int chr, bool down, int modifie
+             {
+                 SFusion.SetGravityEnabled(true);
+             }
+-            SetAdjustMessage("Tilt Correction %s\nYaw Correction %s", 
++            SetAdjustMessage("Tilt Correction %s\nYaw Correction %s",
+                 SFusion.IsGravityEnabled() ? "On" : "Off",
+                 SFusion.IsYawCorrectionEnabled() ? "On" : "Off");
+         }
+@@ -965,12 +965,12 @@ void OculusWorldDemoApp::OnKey(OVR::KeyCode key, int chr, bool down, int modifie
+         {
+             if (SceneMode != Scene_YawView)
+             {
+-                SceneMode = Scene_YawView;  
++                SceneMode = Scene_YawView;
+                 SetAdjustMessage("Magnetometer Yaw Angle Marks");
+             }
+             else
+             {
+-                SceneMode = Scene_World;               
++                SceneMode = Scene_World;
+                 SetAdjustMessage("Magnetometer Marks Off");
+             }
+         }
+@@ -984,12 +984,12 @@ void OculusWorldDemoApp::OnKey(OVR::KeyCode key, int chr, bool down, int modifie
+ 
+             if (shader == RenderDevice::PostProcessShader_Distortion)
+             {
+-                pRender->SetPostProcessShader(RenderDevice::PostProcessShader_DistortionAndChromAb);                
++                pRender->SetPostProcessShader(RenderDevice::PostProcessShader_DistortionAndChromAb);
+                 SetAdjustMessage("Chromatic Aberration Correction On");
+             }
+             else if (shader == RenderDevice::PostProcessShader_DistortionAndChromAb)
+             {
+-                pRender->SetPostProcessShader(RenderDevice::PostProcessShader_Distortion);                
++                pRender->SetPostProcessShader(RenderDevice::PostProcessShader_Distortion);
+                 SetAdjustMessage("Chromatic Aberration Correction Off");
+             }
+             else
+@@ -1010,7 +1010,7 @@ void OculusWorldDemoApp::OnKey(OVR::KeyCode key, int chr, bool down, int modifie
+             {
+                 SFusion.SetPredictionEnabled(true);
+                 SetAdjustMessage("Motion Prediction On");
+-            }      
++            }
+         }
+         break;
+      default:
+@@ -1039,7 +1039,7 @@ void OculusWorldDemoApp::OnIdle()
+         LoadingState = LoadingState_Finished;
+         return;
+     }
+-    
++
+     // Check if any new devices were connected.
+     {
+         bool queueIsEmpty = false;
+@@ -1052,15 +1052,15 @@ void OculusWorldDemoApp::OnIdle()
+                 if (DeviceStatusNotificationsQueue.GetSize() == 0)
+                     break;
+                 desc = DeviceStatusNotificationsQueue.Front();
+-             
++
+                 // We can't call Clear under the lock since this may introduce a dead lock:
+-                // this thread is locked by HandlerLock and the Clear might cause 
++                // this thread is locked by HandlerLock and the Clear might cause
+                 // call of Device->Release, which will use Manager->DeviceLock. The bkg
+-                // thread is most likely locked by opposite way: 
++                // thread is most likely locked by opposite way:
+                 // Manager->DeviceLock ==> HandlerLock, therefore - a dead lock.
+                 // So, just grab the first element, save a copy of it and remove
+                 // the element (Device->Release won't be called since we made a copy).
+-                
++
+                 DeviceStatusNotificationsQueue.RemoveAt(0);
+                 queueIsEmpty = (DeviceStatusNotificationsQueue.GetSize() == 0);
+             }
+@@ -1077,21 +1077,21 @@ void OculusWorldDemoApp::OnIdle()
+                         if (!pSensor)
+                         {
+                             pSensor = *desc.Handle.CreateDeviceTyped<SensorDevice>();
+-							if (pSensor)
+-							{
+-								SFusion.AttachToSensor(pSensor);
+-
+-								SetAdjustMessage("---------------------------\n"
+-												 "SENSOR connected\n"
+-												 "---------------------------");
+-							}
+-							else
+-							{
+-								SetAdjustMessage("----------------------------\n"
+-												 "SENSOR connect failed\n"
+-												 "Unplug and reconnect it.\n"
+-												 "----------------------------");
+-							}
++                            if (pSensor)
++                            {
++                                SFusion.AttachToSensor(pSensor);
++
++                                SetAdjustMessage("---------------------------\n"
++                                                 "SENSOR connected\n"
++                                                 "---------------------------");
++                            }
++                            else
++                            {
++                                SetAdjustMessage("----------------------------\n"
++                                                 "SENSOR connect failed\n"
++                                                 "Unplug and reconnect it.\n"
++                                                 "----------------------------");
++                            }
+                         }
+                         else if (!wasAlreadyCreated)
+                         {
+@@ -1183,7 +1183,7 @@ void OculusWorldDemoApp::OnIdle()
+                     }
+                 }
+             }
+-            else 
++            else
+                 OVR_ASSERT(0); // unexpected action
+         }
+     }
+@@ -1198,7 +1198,7 @@ void OculusWorldDemoApp::OnIdle()
+     const char* results = LatencyUtil.GetResultsString();
+     if (results != NULL)
+     {
+-        LogText("LATENCY TESTER: %s\n", results); 
++        LogText("LATENCY TESTER: %s\n", results);
+     }
+ 
+     // >>> THIS MUST BE PLACED AS CLOSE AS POSSIBLE TO WHERE THE HMD ORIENTATION IS READ <<<
+@@ -1314,13 +1314,13 @@ void OculusWorldDemoApp::OnIdle()
+ }
+ 
+ 
+-static const char* HelpText = 
++static const char* HelpText =
+     "F1         \t100 NoStereo\n"
+     "F2         \t100 Stereo                     \t420 Z    \t520 Drift Correction\n"
+-    "F3         \t100 StereoHMD                  \t420 F6   \t520 Yaw Drift Info\n" 
++    "F3         \t100 StereoHMD                  \t420 F6   \t520 Yaw Drift Info\n"
+     "F4         \t100 MSAA                       \t420 R    \t520 Reset SensorFusion\n"
+     "F9         \t100 FullScreen                 \t420\n"
+-    "F11        \t100 Fast FullScreen                   \t500 - +       \t660 Adj EyeHeight\n"                                           
++    "F11        \t100 Fast FullScreen                   \t500 - +       \t660 Adj EyeHeight\n"
+     "C          \t100 Chromatic Ab                      \t500 [ ]       \t660 Adj FOV\n"
+     "P          \t100 Motion Pred                       \t500 Shift     \t660 Adj Faster\n"
+     "N/M        \t180 Adj Motion Pred\n"
+@@ -1363,7 +1363,7 @@ void OculusWorldDemoApp::Render(const StereoEyeParams& stereo)
+     pRender->BeginScene(PostProcess);
+ 
+     // *** 3D - Configures Viewport/Projection and Render
+-    pRender->ApplyStereoParams(stereo);    
++    pRender->ApplyStereoParams(stereo);
+     pRender->Clear();
+ 
+     pRender->SetDepthMode(true, true);
+@@ -1374,7 +1374,7 @@ void OculusWorldDemoApp::Render(const StereoEyeParams& stereo)
+ 
+     if (SceneMode == Scene_YawView)
+     {
+-        Matrix4f trackerOnlyOrient = Matrix4f::RotationY(ThePlayer.LastSensorYaw) 
++        Matrix4f trackerOnlyOrient = Matrix4f::RotationY(ThePlayer.LastSensorYaw)
+                                    * Matrix4f::RotationX(ThePlayer.EyePitch)
+                                    * Matrix4f::RotationZ(ThePlayer.EyeRoll);
+         YawLinesScene.Render(pRender, stereo.ViewAdjust * trackerOnlyOrient.Inverted());
+@@ -1385,11 +1385,11 @@ void OculusWorldDemoApp::Render(const StereoEyeParams& stereo)
+ 
+     // Render UI in 2D orthographic coordinate system that maps [-1,1] range
+     // to a readable FOV area centered at your eye and properly adjusted.
+-    pRender->ApplyStereoParams2D(stereo);    
++    pRender->ApplyStereoParams2D(stereo);
+     pRender->SetDepthMode(false, false);
+ 
+     float unitPixel = SConfig.Get2DUnitPixel();
+-    float textHeight= unitPixel * 22; 
++    float textHeight= unitPixel * 22;
+ 
+     if ((SceneMode == Scene_Grid)||(SceneMode == Scene_Both))
+     {   // Draw grid two pixels thick.
+@@ -1428,7 +1428,7 @@ void OculusWorldDemoApp::Render(const StereoEyeParams& stereo)
+             OVR_sprintf(gpustat, sizeof(gpustat), "\n GPU Tex: %u MB", texMemInMB);
+             OVR_strcat(buf, sizeof(buf), gpustat);
+         }
+-        
++
+         DrawTextBox(pRender, 0.0f, -0.15f, textHeight, buf, DrawText_HCenter);
+     }
+     break;
+@@ -1436,7 +1436,7 @@ void OculusWorldDemoApp::Render(const StereoEyeParams& stereo)
+     case Text_Config:
+     {
+         char   textBuff[2048];
+-         
++
+         OVR_sprintf(textBuff, sizeof(textBuff),
+                     "Fov\t300 %9.4f\n"
+                     "EyeDistance\t300 %9.4f\n"
+@@ -1459,7 +1459,7 @@ void OculusWorldDemoApp::Render(const StereoEyeParams& stereo)
+ 
+     case Text_Help:
+         DrawTextBox(pRender, 0.0f, -0.1f, textHeight, HelpText, DrawText_Center);
+-            
++
+     default:
+         break;
+     }
+@@ -1543,7 +1543,7 @@ void OculusWorldDemoApp::AdjustMotionPrediction(float dt)
+     {
+         motionPred = 0.0f;
+     }
+-    
++
+     SFusion.SetPrediction(motionPred);
+ 
+     SetAdjustMessage("MotionPrediction: %6.3fs", motionPred);
+@@ -1558,25 +1558,25 @@ void OculusWorldDemoApp::AdjustDistortion(float val, int kIndex)
+ void OculusWorldDemoApp::AdjustEsd(float val)
+ {
+     SConfig.SetEyeToScreenDistance(val);
+-	float esd = SConfig.GetEyeToScreenDistance();
++    float esd = SConfig.GetEyeToScreenDistance();
+     SetAdjustMessage("ESD:%6.3f  FOV: %6.3f", esd, SConfig.GetYFOVDegrees());
+ }
+ 
+ // Loads the scene data
+ void OculusWorldDemoApp::PopulateScene(const char *fileName)
+-{    
+-    XmlHandler xmlHandler;     
++{
++    XmlHandler xmlHandler;
+     if(!xmlHandler.ReadFile(fileName, pRender, &MainScene, &CollisionModels, &GroundCollisionModels))
+     {
+         SetAdjustMessage("---------------------------------\nFILE LOAD FAILED\n---------------------------------");
+         SetAdjustMessageTimeout(10.0f);
+-    }    
++    }
+ 
+     MainScene.SetAmbient(Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
+-    
++
+     // Distortion debug grid (brought up by 'G' key).
+     Ptr<Model> gridModel = *Model::CreateGrid(Vector3f(0,0,0), Vector3f(1.0f/10, 0,0), Vector3f(0,1.0f/10,0),
+-                                              10, 10, 5, 
++                                              10, 10, 5,
+                                               Color(0, 255, 0, 255), Color(255, 50, 50, 255) );
+     GridScene.World.Add(gridModel);
+ 
+@@ -1590,13 +1590,13 @@ void OculusWorldDemoApp::PopulateScene(const char *fileName)
+     Ptr<Model> yawLinesModel = *new Model();
+     Color c = Color(255, 200, 200, 255);
+     float r = 1.5f;
+-    yawLinesModel->AddTriangle(yawLinesModel->AddVertex(Vector3f(-0.1f, 0, -r), c), 
++    yawLinesModel->AddTriangle(yawLinesModel->AddVertex(Vector3f(-0.1f, 0, -r), c),
+                                yawLinesModel->AddVertex(Vector3f(0, 0, -r-0.2f), c),
+                                yawLinesModel->AddVertex(Vector3f(0.1f, 0, -r), c));
+-    yawLinesModel->AddTriangle(yawLinesModel->AddVertex(Vector3f(-r-0.1f, 0, -r), c), 
++    yawLinesModel->AddTriangle(yawLinesModel->AddVertex(Vector3f(-r-0.1f, 0, -r), c),
+                                yawLinesModel->AddVertex(Vector3f(-r, 0, -r-0.2f), c),
+                                yawLinesModel->AddVertex(Vector3f(-r+0.1f, 0, -r), c));
+-    yawLinesModel->AddTriangle(yawLinesModel->AddVertex(Vector3f(r-0.1f, 0, -r), c), 
++    yawLinesModel->AddTriangle(yawLinesModel->AddVertex(Vector3f(r-0.1f, 0, -r), c),
+                                yawLinesModel->AddVertex(Vector3f(r, 0, -r-0.2f), c),
+                                yawLinesModel->AddVertex(Vector3f(r+0.1f, 0, -r), c));
+     yawLinesModel->SetPosition(Vector3f(0.0f,-1.2f,0.0f));
+@@ -1619,7 +1619,7 @@ void OculusWorldDemoApp::PopulatePreloadScene()
+     if (imageTex)
+     {
+         imageTex->SetSampleMode(Sample_Anisotropic|Sample_Repeat);
+-        Ptr<Model> m = *new Model(Prim_Triangles);        
++        Ptr<Model> m = *new Model(Prim_Triangles);
+         m->AddVertex(-0.5f,  0.5f,  0.0f, Color(255,255,255,255), 0.0f, 0.0f);
+         m->AddVertex( 0.5f,  0.5f,  0.0f, Color(255,255,255,255), 1.0f, 0.0f);
+         m->AddVertex( 0.5f, -0.5f,  0.0f, Color(255,255,255,255), 1.0f, 1.0f);
+@@ -1628,8 +1628,8 @@ void OculusWorldDemoApp::PopulatePreloadScene()
+         m->AddTriangle(0,3,2);
+ 
+         Ptr<ShaderFill> fill = *new ShaderFill(*pRender->CreateShaderSet());
+-        fill->GetShaders()->SetShader(pRender->LoadBuiltinShader(Shader_Vertex, VShader_MVP)); 
+-        fill->GetShaders()->SetShader(pRender->LoadBuiltinShader(Shader_Fragment, FShader_Texture)); 
++        fill->GetShaders()->SetShader(pRender->LoadBuiltinShader(Shader_Vertex, VShader_MVP));
++        fill->GetShaders()->SetShader(pRender->LoadBuiltinShader(Shader_Fragment, FShader_Texture));
+         fill->SetTexture(0, imageTex);
+         m->Fill = fill;
+ 
+@@ -1656,7 +1656,7 @@ void OculusWorldDemoApp::PopulateLODFileNames()
+     SPInt diff = len - pos;
+ 
+     if (diff == 0)
+-        return;    
++        return;
+ 
+     while(true)
+     {
+@@ -1734,20 +1734,20 @@ void OculusWorldDemoApp::CycleDisplay()
+     }
+     else
+     {
+-        // Try to find HMD Screen, making it the first screen in full-screen Cycle.        
++        // Try to find HMD Screen, making it the first screen in full-screen Cycle.
+         FirstScreenInCycle = 0;
+ 
+         if (pHMD)
+         {
+             DisplayId HMD (SConfig.GetHMDInfo().DisplayDeviceName, SConfig.GetHMDInfo().DisplayId);
+             for (int i = 0; i< screenCount; i++)
+-            {   
++            {
+                 if (pPlatform->GetDisplay(i) == HMD)
+                 {
+                     FirstScreenInCycle = i;
+                     break;
+                 }
+-            }            
++            }
+         }
+ 
+         // Switch full-screen on the HMD.
+diff --git a/Samples/OculusWorldDemo/Player.cpp b/Samples/OculusWorldDemo/Player.cpp
+index b910307..90e7ef5 100644
+--- a/Samples/OculusWorldDemo/Player.cpp
++++ b/Samples/OculusWorldDemo/Player.cpp
+@@ -24,12 +24,12 @@ limitations under the License.
+ #include <Kernel/OVR_Alg.h>
+ 
+ Player::Player(void)
+-	: UserEyeHeight(1.8f),
+-	  EyePos(7.7f, 1.8f, -1.0f),
++    : UserEyeHeight(1.8f),
++      EyePos(7.7f, 1.8f, -1.0f),
+       EyeYaw(YawInitial), EyePitch(0), EyeRoll(0),
+       LastSensorYaw(0)
+ {
+-	MoveForward = MoveBack = MoveLeft = MoveRight = 0;
++    MoveForward = MoveBack = MoveLeft = MoveRight = 0;
+     GamepadMove = Vector3f(0);
+     GamepadRotate = Vector3f(0);
+ }
+@@ -40,9 +40,9 @@ Player::~Player(void)
+ }
+ 
+ void Player::HandleCollision(double dt, Array<Ptr<CollisionModel> >* collisionModels,
+-	                         Array<Ptr<CollisionModel> >* groundCollisionModels, bool shiftDown)
++                             Array<Ptr<CollisionModel> >* groundCollisionModels, bool shiftDown)
+ {
+-	if(MoveForward || MoveBack || MoveLeft || MoveRight || GamepadMove.LengthSq() > 0)
++    if(MoveForward || MoveBack || MoveLeft || MoveRight || GamepadMove.LengthSq() > 0)
+     {
+         Vector3f orientationVector;
+         // Handle keyboard movement.
+@@ -52,7 +52,7 @@ void Player::HandleCollision(double dt, Array<Ptr<CollisionModel> >* collisionMo
+         {
+             Vector3f localMoveVector(0, 0, 0);
+             Matrix4f yawRotate = Matrix4f::RotationY(EyeYaw);
+-            
++
+             if (MoveForward)
+             {
+                 localMoveVector = ForwardVector;
+@@ -97,9 +97,9 @@ void Player::HandleCollision(double dt, Array<Ptr<CollisionModel> >* collisionMo
+         for(unsigned int i = 0; i < collisionModels->GetSize(); ++i)
+         {
+             // Checks for collisions at eye level, which should prevent us from
+-			// slipping under walls
++            // slipping under walls
+             if (collisionModels->At(i)->TestRay(EyePos, orientationVector, checkLengthForward,
+-				                                &collisionPlaneForward))
++                                                &collisionPlaneForward))
+             {
+                 gotCollision = true;
+             }
+@@ -107,14 +107,14 @@ void Player::HandleCollision(double dt, Array<Ptr<CollisionModel> >* collisionMo
+             Matrix4f leftRotation = Matrix4f::RotationY(45 * (Math<float>::Pi / 180.0f));
+             Vector3f leftVector   = leftRotation.Transform(orientationVector);
+             if (collisionModels->At(i)->TestRay(EyePos, leftVector, checkLengthLeft,
+-				                                &collisionPlaneLeft))
++                                                &collisionPlaneLeft))
+             {
+                 gotCollisionLeft = true;
+             }
+             Matrix4f rightRotation = Matrix4f::RotationY(-45 * (Math<float>::Pi / 180.0f));
+             Vector3f rightVector   = rightRotation.Transform(orientationVector);
+             if (collisionModels->At(i)->TestRay(EyePos, rightVector, checkLengthRight,
+-				                                &collisionPlaneRight))
++                                                &collisionPlaneRight))
+             {
+                 gotCollisionRight = true;
+             }
+@@ -124,13 +124,13 @@ void Player::HandleCollision(double dt, Array<Ptr<CollisionModel> >* collisionMo
+         {
+             // Project orientationVector onto the plane
+             Vector3f slideVector = orientationVector - collisionPlaneForward.N
+-				* (orientationVector.Dot(collisionPlaneForward.N));
++                * (orientationVector.Dot(collisionPlaneForward.N));
+ 
+             // Make sure we aren't in a corner
+             for(unsigned int j = 0; j < collisionModels->GetSize(); ++j)
+             {
+                 if (collisionModels->At(j)->TestPoint(EyePos - Vector3f(0.0f, RailHeight, 0.0f) +
+-					                                  (slideVector * (moveLength))) )
++                                                      (slideVector * (moveLength))) )
+                 {
+                     moveLength = 0;
+                 }
+@@ -151,7 +151,7 @@ void Player::HandleCollision(double dt, Array<Ptr<CollisionModel> >* collisionMo
+         {
+             float checkLengthDown = 10;
+             if (groundCollisionModels->At(i)->TestRay(EyePos, Vector3f(0.0f, -1.0f, 0.0f),
+-				                                      checkLengthDown, &collisionPlaneDown))
++                                                      checkLengthDown, &collisionPlaneDown))
+             {
+                 finalDistanceDown = Alg::Min(finalDistanceDown, checkLengthDown);
+             }
+diff --git a/Samples/OculusWorldDemo/Player.h b/Samples/OculusWorldDemo/Player.h
+index e57e67c..080caaa 100644
+--- a/Samples/OculusWorldDemo/Player.h
++++ b/Samples/OculusWorldDemo/Player.h
+@@ -35,17 +35,17 @@ using namespace OVR::Render;
+ //  Y - Up
+ //  Z - Back
+ //  X - Right
+-const Vector3f	UpVector(0.0f, 1.0f, 0.0f);
+-const Vector3f	ForwardVector(0.0f, 0.0f, -1.0f);
+-const Vector3f	RightVector(1.0f, 0.0f, 0.0f);
++const Vector3f UpVector(0.0f, 1.0f, 0.0f);
++const Vector3f ForwardVector(0.0f, 0.0f, -1.0f);
++const Vector3f RightVector(1.0f, 0.0f, 0.0f);
+ 
+ // We start out looking in the positive Z (180 degree rotation).
+-const float		YawInitial	= 3.141592f;
+-const float		Sensitivity	= 1.0f;
+-const float		MoveSpeed	= 3.0f; // m/s
++const float YawInitial  = 3.141592f;
++const float Sensitivity = 1.0f;
++const float MoveSpeed   = 3.0f; // m/s
+ 
+ // These are used for collision detection
+-const float		RailHeight	= 0.8f;
++const float        RailHeight    = 0.8f;
+ 
+ 
+ //-------------------------------------------------------------------------------------
+@@ -56,26 +56,26 @@ class Player
+ {
+ public:
+ 
+-	float				UserEyeHeight;
++    float                UserEyeHeight;
+ 
+-	// Position and look. The following apply:
++    // Position and look. The following apply:
+     Vector3f            EyePos;
+     float               EyeYaw;         // Rotation around Y, CCW positive when looking at RHS (X,Z) plane.
+     float               EyePitch;       // Pitch. If sensor is plugged in, only read from sensor.
+     float               EyeRoll;        // Roll, only accessible from Sensor.
+     float               LastSensorYaw;  // Stores previous Yaw value from to support computing delta.
+ 
+-	// Movement state; different bits may be set based on the state of keys.
++    // Movement state; different bits may be set based on the state of keys.
+     UByte               MoveForward;
+     UByte               MoveBack;
+     UByte               MoveLeft;
+     UByte               MoveRight;
+     Vector3f            GamepadMove, GamepadRotate;
+ 
+-	Player();
+-	~Player();
+-	void HandleCollision(double dt, Array<Ptr<CollisionModel> >* collisionModels,
+-		                 Array<Ptr<CollisionModel> >* groundCollisionModels, bool shiftDown);
++    Player();
++    ~Player();
++    void HandleCollision(double dt, Array<Ptr<CollisionModel> >* collisionModels,
++                         Array<Ptr<CollisionModel> >* groundCollisionModels, bool shiftDown);
+ };
+ 
+ #endif

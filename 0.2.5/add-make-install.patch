@@ -1,0 +1,29 @@
+diff --git a/Makefile b/Makefile
+index 62a3687..235da01 100644
+--- a/Makefile
++++ b/Makefile
+@@ -58,6 +58,7 @@ endif
+ 
+ ####### Paths
+ 
++PREFIX        = /usr/local
+ LIBOVRPATH    = ./LibOVR
+ DEMOPATH      = ./Samples/OculusWorldDemo
+ 
+@@ -76,6 +77,16 @@ $(DEMOTARGET): $(DEMOPATH)/Makefile
+ $(LIBOVRTARGET): $(LIBOVRPATH)/Makefile
+ 	$(MAKE) -C $(LIBOVRPATH) DEBUG=$(DEBUG)
+ 
++# The OVR includes are a bit broken as they cross-reference each other.
++# Copy Include/ and Src/ into $(PREFIX)/include/ovr, and make the toplevel
++# files accessible right there.
++install:
++	install $(LIBOVRTARGET) $(PREFIX)/lib
++	install -d $(PREFIX)/include/ovr
++	cp -r $(LIBOVRPATH)/Include $(LIBOVRPATH)/Src $(PREFIX)/include/ovr
++	echo '#include "Include/OVR.h"' > $(PREFIX)/include/ovr/OVR.h
++	ln -sf $(PREFIX)/include/ovr/Include/OVRVersion.h $(PREFIX)/include/ovr/
++
+ clean:
+ 	$(MAKE) -C $(LIBOVRPATH) clean DEBUG=$(DEBUG)
+ 	$(MAKE) -C $(DEMOPATH) clean DEBUG=$(DEBUG)

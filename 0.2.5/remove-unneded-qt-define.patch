@@ -1,0 +1,13 @@
+diff --git a/Samples/OculusWorldDemo/Makefile b/Samples/OculusWorldDemo/Makefile
+index 6015560..823fb21 100644
+--- a/Samples/OculusWorldDemo/Makefile
++++ b/Samples/OculusWorldDemo/Makefile
+@@ -42,7 +42,7 @@ CXX           = g++
+ LINK          = g++
+ MAKE          = make
+ DELETEFILE    = rm -f
+-DEFINES       = -DQT_WEBKIT -DGL_GLEXT_PROTOTYPES
++DEFINES       = -DGL_GLEXT_PROTOTYPES
+ 
+ ####### Detect debug or release
+ 
