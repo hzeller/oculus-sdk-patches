@@ -25,6 +25,6 @@ Patches here
      very messy. Fixed these to be always 4 spaces.
 
 [add-make-install]: https://github.com/hzeller/oculus-sdk-patches/raw/master/0.2.5/add-make-install.patch
-[fix-compile-warnings]: https://github.com/hzeller/oculus-sdk-patches/raw/master/0.2.5/fix-compile-warnings.patch.patch
+[fix-compile-warnings]: https://github.com/hzeller/oculus-sdk-patches/raw/master/0.2.5/fix-compile-warnings.patch
 [fix-indentation-mess-in-samples]: https://github.com/hzeller/oculus-sdk-patches/raw/master/0.2.5/fix-indentation-mess-in-samples.patch
-[remove-unneded-qt-define]: https://github.com/hzeller/oculus-sdk-patches/raw/master/0.2.5/remove-unneded-qt-define.patch
+[remove-unneeded-qt-define]: https://github.com/hzeller/oculus-sdk-patches/raw/master/0.2.5/remove-unneeded-qt-define.patch
